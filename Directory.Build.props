@@ -1,7 +1,7 @@
 ﻿<Project>
 <PropertyGroup>
     <Company>BSmith</Company>
-    <Version>0.2.8</Version>
+    <Version>0.2.10</Version>
     <AssemblyTitle>runner</AssemblyTitle>
 </PropertyGroup>
 </Project>

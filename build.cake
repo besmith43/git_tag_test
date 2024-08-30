@@ -67,7 +67,72 @@ Task("Major-Release")
 	XmlPoke(propsFile, "//Version", version);
 });
 
+Task("GitCommit")
+	.Does(() =>
+{
+	var propsFile = "./Directory.Build.props";
+	var readedVersion = XmlPeek(propsFile, "//Version");
+	var currentVersion = new Version(readedVersion);
+
+
+	ProcessStartInfo gitAddStartInfo = new ProcessStartInfo();
+	gitAddStartInfo.FileName = "git";
+	gitAddStartInfo.Arguments = $"add -A";
+	gitAddStartInfo.UseShellExecute = false;
+	gitAddStartInfo.RedirectStandardOutput = true;
+	gitAddStartInfo.RedirectStandardError = true;
+	gitAddStartInfo.CreateNoWindow = true;
+
+	Process gitAddProcess = new Process();
+	gitAddProcess.StartInfo = gitAddStartInfo;
+	gitAddProcess.Start();
+
+	string gitAddStdOutput = gitAddProcess.StandardOutput.ReadToEnd();
+	string gitAddStdError = gitAddProcess.StandardError.ReadToEnd();
+
+	gitAddProcess.WaitForExit();
+
+	if (gitAddProcess.ExitCode != 0)
+	{
+		Information(gitAddStdError);
+		throw new Exception("git add failed");
+	}
+	else
+	{
+		Information(gitAddStdOutput);
+	}
+
+
+	ProcessStartInfo gitCommitStartInfo = new ProcessStartInfo();
+	gitCommitStartInfo.FileName = "git";
+	gitCommitStartInfo.Arguments = $"commit -m \"{currentVersion.ToString()}\"";
+	gitCommitStartInfo.UseShellExecute = false;
+	gitCommitStartInfo.RedirectStandardOutput = true;
+	gitCommitStartInfo.RedirectStandardError = true;
+	gitCommitStartInfo.CreateNoWindow = true;
+
+	Process gitCommitProcess = new Process();
+	gitCommitProcess.StartInfo = gitCommitStartInfo;
+	gitCommitProcess.Start();
+
+	string gitCommitStdOutput = gitCommitProcess.StandardOutput.ReadToEnd();
+	string gitCommitStdError = gitCommitProcess.StandardError.ReadToEnd();
+
+	gitCommitProcess.WaitForExit();
+
+	if (gitCommitProcess.ExitCode != 0)
+	{
+		Information(gitCommitStdError);
+		throw new Exception("git commit failed");
+	}
+	else
+	{
+		Information(gitCommitStdOutput);
+	}
+});
+
 Task("Tag")
+	.IsDependentOn("GitCommit")
 	.Does(() =>
 {
 	var propsFile = "./Directory.Build.props";
