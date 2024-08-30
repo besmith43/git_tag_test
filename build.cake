@@ -129,6 +129,34 @@ Task("GitCommit")
 	{
 		Information(gitCommitStdOutput);
 	}
+
+
+	ProcessStartInfo gitPushStartInfo = new ProcessStartInfo();
+	gitPushStartInfo.FileName = "git";
+	gitPushStartInfo.Arguments = $"push";
+	gitPushStartInfo.UseShellExecute = false;
+	gitPushStartInfo.RedirectStandardOutput = true;
+	gitPushStartInfo.RedirectStandardError = true;
+	gitPushStartInfo.CreateNoWindow = true;
+
+	Process gitPushProcess = new Process();
+	gitPushProcess.StartInfo = gitPushStartInfo;
+	gitPushProcess.Start();
+
+	string gitPushStdOutput = gitPushProcess.StandardOutput.ReadToEnd();
+	string gitPushStdError = gitPushProcess.StandardError.ReadToEnd();
+
+	gitPushProcess.WaitForExit();
+
+	if (gitPushProcess.ExitCode != 0)
+	{
+		Information(gitPushStdError);
+		throw new Exception("git push failed");
+	}
+	else
+	{
+		Information(gitPushStdOutput);
+	}
 });
 
 Task("Tag")
